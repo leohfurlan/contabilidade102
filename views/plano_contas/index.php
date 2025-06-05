@@ -1,13 +1,12 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php
 // Função recursiva para renderizar a árvore de contas
-// Coloque esta função no início do arquivo da view ou em um helper do seu módulo
 if (!function_exists('render_contas_tree_ul')) {
-    function render_contas_tree_ul($contas_array, $module_name, $level = 0) {
+    function render_contas_tree_ul($contas_array, $module_name_in_view, $level = 0) {
         if (empty($contas_array)) {
             return '';
         }
-        $html = '<ul class="plano-contas-tree list-unstyled">'; // Adicionar classe para estilização
+        $html = '<ul class="plano-contas-tree list-unstyled">';
 
         foreach ($contas_array as $conta) {
             $is_sintetica = ($conta['permite_lancamentos'] == 0);
@@ -15,31 +14,28 @@ if (!function_exists('render_contas_tree_ul')) {
 
             $html .= '<li class="conta-item' . (!$is_ativa ? ' conta-inativa' : '') . ($is_sintetica ? ' conta-sintetica' : ' conta-analitica') . '" data-id="' . $conta['id'] . '">';
             
-            $html .= '<div class="conta-info">'; // Container para a linha da conta
+            $html .= '<div class="conta-info">';
             $html .= '<span class="conta-codigo">' . htmlspecialchars($conta['codigo']) . '</span> - ';
             $html .= '<span class="conta-nome">' . htmlspecialchars($conta['nome']) . '</span>';
             
-            // Badges para tipo e natureza (opcional, pode poluir)
-            // $html .= ' <span class="label label-default">' . _l('contabilidade_tipo_short_' . $conta['tipo']) . '</span>';
-            // $html .= ' <span class="label label-default">' . _l('contabilidade_natureza_short_' . $conta['natureza']) . '</span>';
-
             if (!$is_sintetica) {
-                $html .= ' <span class="label label-info">' . _l('contabilidade_analitica_short_label') . '</span>';
+                $html .= ' <span class="label label-info">' . _l('contabilidade102_analitica_short_label') . '</span>';
             } else {
-                 $html .= ' <span class="label label-warning">' . _l('contabilidade_sintetica_short_label') . '</span>';
+                 $html .= ' <span class="label label-warning">' . _l('contabilidade102_sintetica_short_label') . '</span>';
             }
             if (!$is_ativa) {
-                $html .= ' <span class="label label-danger">' . _l('contabilidade_inativo_status') . '</span>';
+                $html .= ' <span class="label label-danger">' . _l('contabilidade102_inativo_status') . '</span>';
             }
 
-            $html .= '<div class="conta-actions pull-right">'; // Ações à direita
-            $html .= ' <a href="' . admin_url($module_name . '/plano_contas/manage/' . $conta['id']) . '" class="btn btn-default btn-xs" title="'._l('edit').'"><i class="fa fa-pencil"></i></a>';
-            $html .= ' <a href="' . admin_url($module_name . '/plano_contas/delete/' . $conta['id']) . '" class="btn btn-danger btn-xs _delete" title="'._l('delete').'"><i class="fa fa-remove"></i></a>';
+            $html .= '<div class="conta-actions pull-right">';
+            // CORREÇÃO AQUI: Usando $module_name_in_view ou a constante
+            $html .= ' <a href="' . admin_url($module_name_in_view . '/plano_contas/manage/' . $conta['id']) . '" class="btn btn-default btn-xs" title="'._l('edit').'"><i class="fa fa-pencil"></i></a>';
+            $html .= ' <a href="' . admin_url($module_name_in_view . '/plano_contas/delete/' . $conta['id']) . '" class="btn btn-danger btn-xs _delete" title="'._l('delete').'"><i class="fa fa-remove"></i></a>';
             $html .= '</div>';
-            $html .= '</div>'; // Fim conta-info
+            $html .= '</div>';
 
             if (!empty($conta['children'])) {
-                $html .= render_contas_tree_ul($conta['children'], $module_name, $level + 1);
+                $html .= render_contas_tree_ul($conta['children'], $module_name_in_view, $level + 1);
             }
             $html .= '</li>';
         }
@@ -57,8 +53,9 @@ if (!function_exists('render_contas_tree_ul')) {
                 <div class="panel_s">
                     <div class="panel-body">
                         <div class="_buttons">
-                            <a href="<?= admin_url($this->module_name . '/plano_contas/manage'); ?>" class="btn btn-info pull-left display-block">
-                                <?= _l('contabilidade_adicionar_nova_conta'); ?>
+                            <?php // CORREÇÃO AQUI: Usando a constante para construir a URL ?>
+                            <a href="<?= admin_url(CONTABILIDADE102_MODULE_NAME . '/plano_contas/manage'); ?>" class="btn btn-info pull-left display-block">
+                                <?= _l('contabilidade102_adicionar_nova_conta'); ?>
                             </a>
                         </div>
                         <div class="clearfix"></div>
@@ -71,10 +68,14 @@ if (!function_exists('render_contas_tree_ul')) {
 
                         <?php if (isset($contas_tree) && count($contas_tree) > 0) : ?>
                             <div class="plano-contas-container">
-                                <?php echo render_contas_tree_ul($contas_tree, $this->module_name); ?>
+                                <?php
+                                    // A melhor prática é usar a constante diretamente.
+                                    // Se precisarmos do nome do módulo na função recursiva, passamos a constante para ela.
+                                    echo render_contas_tree_ul($contas_tree, CONTABILIDADE102_MODULE_NAME);
+                                ?>
                             </div>
                         <?php else : ?>
-                            <p class="no-margin"><?= _l('contabilidade_nenhuma_conta_cadastrada'); ?></p>
+                            <p class="no-margin"><?= _l('contabilidade102_nenhuma_conta_cadastrada'); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -99,18 +100,9 @@ if (!function_exists('render_contas_tree_ul')) {
     position: relative;
     padding: 5px 0;
 }
-/* Linha horizontal para conectar ao item (opcional) */
-.plano-contas-tree li::before {
-    /* content: "";
-    position: absolute;
-    top: 15px; 
-    left: -15px; 
-    border-bottom: 1px dashed #ccc;
-    width: 10px;
-    height: 0; */
-}
+
 .conta-item {
-    /* border-bottom: 1px solid #f0f0f0; */ /* Linha separadora suave */
+    /* border-bottom: 1px solid #f0f0f0; */
 }
 .conta-item:last-child {
     /* border-bottom: none; */
@@ -118,19 +110,19 @@ if (!function_exists('render_contas_tree_ul')) {
 .conta-info {
     padding: 3px 5px;
     border-radius: 3px;
-    display: flex; /* Para alinhar itens na linha */
-    align-items: center; /* Alinha verticalmente no centro */
+    display: flex;
+    align-items: center;
 }
 .conta-info:hover {
     background-color: #f9f9f9;
 }
 .conta-codigo { font-weight: bold; margin-right: 5px; }
-.conta-nome { flex-grow: 1; } /* Faz o nome ocupar o espaço restante */
+.conta-nome { flex-grow: 1; }
 .conta-actions {
     margin-left: 10px;
-    white-space: nowrap; /* Impede que os botões quebrem linha */
+    white-space: nowrap;
 }
-.conta-sintetica .conta-nome { font-weight: 500; } /* Destaca sintéticas */
+.conta-sintetica .conta-nome { font-weight: 500; }
 .conta-analitica .conta-nome {}
 .conta-inativa .conta-nome,
 .conta-inativa .conta-codigo {

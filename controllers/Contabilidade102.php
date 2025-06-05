@@ -2,7 +2,7 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Admin extends AdminController
+class Contabilidade102 extends AdminController
 {
     protected $module_name;
 

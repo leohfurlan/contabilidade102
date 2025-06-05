@@ -17,13 +17,13 @@
                             <div class="col-md-3">
                                 <?php
                                     // $periodo_inicio é passado pelo controller
-                                    echo render_date_input('periodo_inicio', _l('contabilidade_periodo_inicio'), _d($periodo_inicio));
+                                    echo render_date_input('periodo_inicio', _l('contabilidade102_periodo_inicio'), _d($periodo_inicio));
                                 ?>
                             </div>
                             <div class="col-md-3">
                                 <?php
                                     // $periodo_fim é passado pelo controller
-                                    echo render_date_input('periodo_fim', _l('contabilidade_periodo_fim'), _d($periodo_fim));
+                                    echo render_date_input('periodo_fim', _l('contabilidade102_periodo_fim'), _d($periodo_fim));
                                 ?>
                             </div>
                             <?php
@@ -41,13 +41,13 @@
                             <table class="table table-striped table-bordered"> <?php // Removido dt-table se a formatação for manual e complexa ?>
                                 <thead>
                                     <tr>
-                                        <th><?= _l('contabilidade_diario_data'); ?></th>
-                                        <th><?= _l('contabilidade_diario_lancamento_id'); ?></th>
-                                        <th><?= _l('contabilidade_diario_conta_codigo'); ?></th>
-                                        <th><?= _l('contabilidade_diario_conta_nome'); ?></th>
-                                        <th><?= _l('contabilidade_diario_historico'); ?></th>
-                                        <th class="text-right"><?= _l('contabilidade_diario_debito'); ?></th>
-                                        <th class="text-right"><?= _l('contabilidade_diario_credito'); ?></th>
+                                        <th><?= _l('contabilidade102_diario_data'); ?></th>
+                                        <th><?= _l('contabilidade102_diario_lancamento_id'); ?></th>
+                                        <th><?= _l('contabilidade102_diario_conta_codigo'); ?></th>
+                                        <th><?= _l('contabilidade102_diario_conta_nome'); ?></th>
+                                        <th><?= _l('contabilidade102_diario_historico'); ?></th>
+                                        <th class="text-right"><?= _l('contabilidade102_diario_debito'); ?></th>
+                                        <th class="text-right"><?= _l('contabilidade102_diario_credito'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -58,7 +58,7 @@
                                         foreach ($lancamentos_diario as $data_lanc => $lancamentos_do_dia) :
                                     ?>
                                         <tr>
-                                            <td colspan="7" class="bold" style="background-color: #f0f0f0;"><?= _l('contabilidade_diario_dia_header', _d($data_lanc)); ?></td>
+                                            <td colspan="7" class="bold" style="background-color: #f0f0f0;"><?= _l('contabilidade102_diario_dia_header', _d($data_lanc)); ?></td>
                                         </tr>
                                         <?php foreach ($lancamentos_do_dia as $lanc_id => $lancamento_info) : ?>
                                             <?php foreach ($lancamento_info['itens'] as $item_idx => $item) :
@@ -74,7 +74,7 @@
                                                     <td>
                                                         <?php
                                                             if ($item_idx == 0) {
-                                                                echo htmlspecialchars($lancamento_info['descricao_historico']);
+                                                                echo htmlspecialchars($lancamento_info['historico_principal']);
                                                                 if (!empty($item['historico_complementar'])) {
                                                                     echo ' <small><em>(' . htmlspecialchars($item['historico_complementar']) . ')</em></small>';
                                                                 }
@@ -89,7 +89,7 @@
                                             <?php endforeach; ?>
                                             <?php // Validação visual se o lançamento individual está balanceado
                                                 if (abs($lancamento_info['total_debito'] - $lancamento_info['total_credito']) > 0.001) : ?>
-                                                <tr><td colspan="7" class="text-danger text-center"><?= _l('contabilidade_diario_lancamento_desbalanceado', $lanc_id)?></td></tr>
+                                                <tr><td colspan="7" class="text-danger text-center"><?= _l('contabilidade102_diario_lancamento_desbalanceado', $lanc_id)?></td></tr>
                                             <?php endif; ?>
                                         <?php endforeach; ?>
                                     <?php
@@ -97,7 +97,7 @@
                                     else :
                                     ?>
                                         <tr>
-                                            <td colspan="7" class="text-center"><?= _l('contabilidade_nenhum_lancamento_periodo'); ?></td>
+                                            <td colspan="7" class="text-center"><?= _l('contabilidade102_nenhum_lancamento_periodo'); ?></td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
