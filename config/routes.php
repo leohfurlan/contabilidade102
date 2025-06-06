@@ -13,7 +13,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 // Rota principal para o dashboard do módulo.
 // Acessada via: SEU_DOMINIO/admin/contabilidade102
-// Direciona para: modules/contabilidade102/controllers/Admin.php -> método index()
+// Direciona para: modules/contabilidade102/controllers/Contabilidade102.php -> método index()
 $route['admin/contabilidade102'] = 'contabilidade102/admin/index';
 
 
