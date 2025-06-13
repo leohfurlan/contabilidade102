@@ -30,6 +30,9 @@ class PlanoContas extends AdminController
         // Chama o método do model que retorna a estrutura de árvore
         $data['contas_tree'] = $this->planocontas_model->get_all_contas_hierarchical();
         $data['title']       = _l('contabilidade102_plano_de_contas_titulo');
+
+        $data['module_name']  = CONTABILIDADE102_MODULE_NAME;   // 'contabilidade102'
+        $data['slug_pc']      = 'planocontas';                  // para manter tudo num só lugar
         
         $this->load->view($this->module_name . '/planocontas/index', $data);
     }

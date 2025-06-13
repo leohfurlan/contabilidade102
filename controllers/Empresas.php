@@ -1,18 +1,26 @@
 <?php
-
 defined('BASEPATH') or exit('No direct script access allowed');
 
-// Sugestão: Renomear este controller para Empresas.php e a classe para Empresas
-class Cadastro extends AdminController // Ou class Empresas extends AdminController
+class Empresas extends AdminController
 {
     protected $module_name;
 
     public function __construct()
     {
         parent::__construct();
-        $this->module_name = CONTABILIDADE102_MODULE_NAME;
-        $this->load->model($this->module_name . '/cadastro_model');
-        $this->load->model('clients_model'); // Model nativo Perfex
+        $this->module_name = 'contabilidade102';
+        if (defined('CONTABILIDADE102_MODULE_NAME')) {
+            $this->module_name = CONTABILIDADE102_MODULE_NAME;
+        }
+
+        if (!has_permission($this->module_name, '', 'view')) {
+            access_denied($this->module_name);
+        }
+        
+        // Garante que os models são carregados com a capitalização correta
+        $this->load->model($this->module_name . '/Cadastro_model');
+        $this->load->model('clients_model');
+        
         $this->load->library('form_validation');
     }
 
@@ -21,117 +29,97 @@ class Cadastro extends AdminController // Ou class Empresas extends AdminControl
      */
     public function index()
     {
-        if (!has_permission($this->module_name, '', 'view')) {
-            access_denied($this->module_name);
-        }
+        // Teste de Debug (descomente as linhas uma por uma para encontrar o erro)
 
-        $data['empresas'] = $this->cadastro_model->get_all_empresas_vinculadas();
-        $data['title']    = _l('contabilidade_empresas_vinculadas_titulo_lista'); // Nova string de idioma
-        $this->load->view($this->module_name . '/cadastro/index', $data);
+        // Teste 1: Apenas o título
+        $data['title']    = _l('contabilidade102_empresas_vinculadas_titulo_lista');
+        
+        // Teste 2: Tente carregar os dados do model. Se a página quebrar aqui, o erro está no model.
+        // $data['empresas'] = $this->Cadastro_model->get_all_empresas_vinculadas();
+
+        // Teste 3: Tente carregar a view. Se a página quebrar aqui, o erro está na view.
+        // $this->load->view($this->module_name . '/empresas/index', $data);
     }
 
     /**
      * Exibe o formulário para vincular um novo cliente Perfex à contabilidade
      * ou para editar um vínculo existente.
-     * @param string $id (Opcional) ID da empresa na tabela contabilidade_empresas para edição.
+     * @param string $id (Opcional) ID do vínculo na tabela contabilidade_empresas para edição.
      */
-    public function vincular($id = '')
+    public function manage($id = '')
     {
-        if (!has_permission($this->module_name, '', ($id == '' ? 'create' : 'edit'))) {
-            access_denied($this->module_name);
-        }
-
-        $data = [];
-        if (!empty($id)) {
-            $data['empresa_contabil'] = $this->cadastro_model->get_empresa_contabil($id);
+        if (!empty($id)) { // Modo Edição
+            if (!has_permission($this->module_name, '', 'edit')) {
+                access_denied($this->module_name);
+            }
+            $data['empresa_contabil'] = $this->Cadastro_model->get_empresa_contabil($id);
             if (!$data['empresa_contabil']) {
-                set_alert('danger', _l('contabilidade_empresa_nao_encontrada'));
+                set_alert('danger', _l('contabilidade102_empresa_nao_encontrada'));
                 redirect(admin_url($this->module_name . '/empresas'));
             }
-            $data['title'] = _l('contabilidade_editar_vinculo_empresa_titulo'); // Nova string de idioma
-        } else {
-            $data['title'] = _l('contabilidade_vincular_nova_empresa_titulo'); // Nova string de idioma
+            $data['title'] = _l('contabilidade102_editar_vinculo_empresa_titulo');
+        } else { // Modo Adição
+            if (!has_permission($this->module_name, '', 'create')) {
+                access_denied($this->module_name);
+            }
+            $data['title'] = _l('contabilidade102_vincular_nova_empresa_titulo');
         }
 
-        // Clientes Perfex que ainda não estão vinculados (para o modo de adição)
-        // ou todos para seleção (e o controller/model impede duplicação se necessário)
+        // Busca clientes do Perfex
         $perfex_clients = $this->clients_model->get();
+        $clientes_disponiveis = [];
         
-        // Filtra clientes já vinculados se estiver no modo de adição de novo vínculo
+        // Filtra clientes que já estão vinculados se estiver no modo de adição
         if (empty($id)) {
-            $empresas_vinculadas = $this->cadastro_model->get_all_empresas_vinculadas();
+            $empresas_vinculadas = $this->Cadastro_model->get_all_empresas_vinculadas();
             $cliente_ids_vinculados = array_column($empresas_vinculadas, 'cliente_id');
             
-            $clientes_disponiveis = [];
             foreach ($perfex_clients as $client) {
                 if (!in_array($client['userid'], $cliente_ids_vinculados)) {
                     $clientes_disponiveis[] = $client;
                 }
             }
-             $data['clientes'] = $clientes_disponiveis;
         } else {
-            // No modo de edição, o cliente já está selecionado e não deve ser alterado,
-            // ou se permitir alteração, tratar a lógica de desvincular o antigo e vincular o novo.
-            // Por simplicidade, vamos assumir que o cliente vinculado não muda na edição do vínculo.
-            // Para exibir o cliente selecionado no dropdown, pode-se adicionar o cliente atual aos disponíveis ou apenas exibir o nome.
-            // Aqui, estamos passando todos os clientes. A view form_vincular_cliente.php já lida com o 'selected'.
-            $data['clientes'] = $perfex_clients;
+            // No modo de edição, exibe todos para popular o select, que estará desabilitado
+            $clientes_disponiveis = $perfex_clients;
         }
+        $data['clientes_disponiveis'] = $clientes_disponiveis;
+        
+        // Busca contadores para o select
+        $data['contadores'] = $this->Cadastro_model->get_all_contadores();
 
-
-        $data['contadores'] = $this->cadastro_model->get_all_contadores(); // Para o select de contador
-
-        $this->load->view($this->module_name . '/cadastro/form_vincular_cliente', $data);
+        // Carrega a view do formulário (que você renomeou para form_vincular_clientes.php)
+        // Se você renomeou para 'manage.php' dentro da pasta 'empresas', o caminho estaria correto.
+        // Vou usar o nome manage.php como padrão, ajuste se o seu for diferente.
+        $this->load->view($this->module_name . '/empresas/manage', $data);
     }
 
     /**
      * Processa os dados do formulário de vínculo/atualização de empresa.
+     * @param string $id (Opcional) ID do vínculo a ser atualizado.
      */
-    public function processar_vinculo()
+    public function processar_vinculo($id = '')
     {
-        if (!has_permission($this->module_name, '', 'create') && !has_permission($this->module_name, '', 'edit')) {
+        if (!has_permission($this->module_name, '', ($id == '' ? 'create' : 'edit'))) {
             access_denied($this->module_name);
         }
 
         if ($this->input->post()) {
             $data = $this->input->post();
-            $id_empresa_contabil = isset($data['empresa_contabil_id']) ? $data['empresa_contabil_id'] : null;
-
-            // Regras de Validação
-            $this->form_validation->set_rules('cliente_id', _l('contabilidade_cliente_perfex'), 'required');
-            // Adicione mais regras conforme necessário para outros campos
-            // Ex: $this->form_validation->set_rules('regime_tributario', _l('contabilidade_regime_tributario'), 'max_length[100]');
-
+            
+            // Validação
+            $this->form_validation->set_rules('cliente_id', _l('contabilidade102_cliente_perfex'), 'required');
+            
             if ($this->form_validation->run() !== false) {
-                // Verificar se já existe um vínculo para este cliente_id se for uma nova adição
-                if (empty($id_empresa_contabil)) { // Apenas para novos vínculos
-                    $empresa_existente = $this->cadastro_model->get_empresa_by_cliente_id($data['cliente_id']);
-                    if ($empresa_existente) {
-                        set_alert('warning', _l('contabilidade_cliente_ja_vinculado'));
-                        // Redirecionar de volta para o formulário, talvez com os dados preenchidos
-                        // Para simplificar, redirecionamos para a lista.
-                        redirect(admin_url($this->module_name . '/empresas/vincular'));
-                        return;
-                    }
-                }
-
-                $result = $this->cadastro_model->vincular_ou_atualizar_empresa($data);
+                $result = $this->Cadastro_model->vincular_ou_atualizar_empresa($id, $data);
 
                 if ($result) {
-                    set_alert('success', _l(empty($id_empresa_contabil) ? 'contabilidade_empresa_vinculada_sucesso' : 'contabilidade_vinculo_atualizado_sucesso'));
+                    set_alert('success', _l(empty($id) ? 'contabilidade102_empresa_vinculada_sucesso' : 'contabilidade102_vinculo_atualizado_sucesso'));
                 } else {
-                    set_alert('danger', _l('contabilidade_erro_processar_vinculo'));
+                    set_alert('danger', _l('contabilidade102_erro_processar_vinculo'));
                 }
             } else {
-                // Falha na validação
-                set_alert('danger', _l('contabilidade_erro_validacao_formulario') . validation_errors());
-                // Poderia redirecionar para o formulário com os erros, mas Perfex geralmente redireciona para a lista ou dashboard.
-                // Para uma melhor UX, redirecionar de volta ao formulário seria bom,
-                // mas requer carregar os dados novamente.
-                // redirect(admin_url($this->module_name . '/empresas/vincular/' . $id_empresa_contabil));
-                // Por ora, redireciona para a lista:
-                 redirect(admin_url($this->module_name . '/empresas'));
-                 return; // Para garantir que o script pare aqui
+                set_alert('danger', _l('contabilidade102_erro_validacao_formulario') . validation_errors());
             }
              redirect(admin_url($this->module_name . '/empresas'));
         }
@@ -139,39 +127,20 @@ class Cadastro extends AdminController // Ou class Empresas extends AdminControl
 
     /**
      * Remove o vínculo de uma empresa com a contabilidade.
-     * @param int $id ID da empresa na tabela contabilidade_empresas
+     * @param int $id ID do vínculo na tabela contabilidade_empresas
      */
     public function remover_vinculo($id)
     {
-        if (empty($id)) {
-            redirect(admin_url($this->module_name . '/empresas'));
-        }
-        if (!has_permission($this->module_name, '', 'delete')) {
+        if (empty($id) || !has_permission($this->module_name, '', 'delete')) {
             access_denied($this->module_name);
         }
 
-        $empresa = $this->cadastro_model->get_empresa_contabil($id);
-        if (!$empresa) {
-            set_alert('danger', _l('contabilidade_empresa_nao_encontrada'));
-            redirect(admin_url($this->module_name . '/empresas'));
-        }
-
-        $success = $this->cadastro_model->remover_vinculo_empresa($id);
+        $success = $this->Cadastro_model->remover_vinculo_empresa($id);
         if ($success) {
-            set_alert('success', _l('contabilidade_vinculo_removido_sucesso'));
+            set_alert('success', _l('contabilidade102_vinculo_removido_sucesso'));
         } else {
-            set_alert('danger', _l('contabilidade_erro_remover_vinculo'));
+            set_alert('danger', _l('contabilidade102_erro_remover_vinculo'));
         }
         redirect(admin_url($this->module_name . '/empresas'));
     }
-
-    /*
-     * O arquivo original `views/cadastro/form_empresa.php`
-     * que permitia cadastrar CNPJ e Razão Social diretamente não está sendo usado
-     * neste fluxo de "vincular cliente Perfex". Se essa funcionalidade for desejada,
-     * um novo método no controller e um model associado seriam necessários para
-     * criar um novo cliente no Perfex E depois vinculá-lo, ou criar uma "empresa"
-     * apenas no módulo de contabilidade sem vínculo direto com tblclients.
-     * Por ora, este controller foca em gerenciar os VÍNCULOS com clientes Perfex existentes.
-     */
 }

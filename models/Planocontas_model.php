@@ -9,7 +9,7 @@ class Planocontas_model extends App_Model // <--- CLASSE RENOMEADA AQUI
     public function __construct()
     {
         parent::__construct();
-        $this->table_plano_contas = db_prefix() . 'contabilidade_plano_contas';
+        $this->table_plano_contas = db_prefix() . 'contabilidade_planocontas';
     }
 
     /**

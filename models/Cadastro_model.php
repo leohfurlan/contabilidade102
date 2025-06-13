@@ -44,24 +44,25 @@ class Cadastro_model extends App_Model
      * Lista todas as empresas vinculadas à contabilidade com dados do cliente Perfex.
      * @return array
      */
-public function get_all_empresas_vinculadas()
-{
-    $this->db->select("{$this->table_empresas}.*, {$this->table_clients}.company as nome_cliente, {$this->table_clients}.vat as cnpj_cliente, {$this->table_clients}.phonenumber as telefone_cliente, {$this->table_clients}.address as endereco_cliente");
-    // ...
-}
+    public function get_all_empresas_vinculadas()
+    {
+        $this->db->select("{$this->table_empresas}.*, {$this->table_clients}.company as nome_cliente, {$this->table_clients}.vat as cnpj_cliente, {$this->table_clients}.phonenumber as telefone_cliente, {$this->table_clients}.address as endereco_cliente");
+        $this->db->from($this->table_empresas);
+        $this->db->join($this->table_clients, "{$this->table_clients}.userid = {$this->table_empresas}.cliente_id", 'left');
+        $this->db->order_by("{$this->table_clients}.company", 'asc');
+        return $this->db->get()->result_array();
+    }
 
     /**
      * Adiciona ou atualiza o vínculo de um cliente Perfex com a contabilidade.
+     * @param int|string $id ID do vínculo a ser atualizado (vazio se for novo)
      * @param array $data Dados do formulário
      * @return int|bool ID da inserção/atualização ou false em caso de falha
      */
-    public function vincular_ou_atualizar_empresa($data)
+    public function vincular_ou_atualizar_empresa($id, $data)
     {
-        $cliente_id = $data['cliente_id'];
-        $empresa_existente = $this->get_empresa_by_cliente_id($cliente_id);
-
         $empresa_data = [
-            'cliente_id'            => $cliente_id,
+            'cliente_id'            => $data['cliente_id'],
             'regime_tributario'     => isset($data['regime_tributario']) ? $data['regime_tributario'] : null,
             'inscricao_estadual'    => isset($data['inscricao_estadual']) ? $data['inscricao_estadual'] : null,
             'inscricao_municipal'   => isset($data['inscricao_municipal']) ? $data['inscricao_municipal'] : null,
@@ -70,13 +71,13 @@ public function get_all_empresas_vinculadas()
             'ativo'                 => isset($data['ativo']) ? 1 : 0,
         ];
 
-        if ($empresa_existente) {
+        if (!empty($id)) {
             // Atualiza
-            $this->db->where('id', $empresa_existente->id);
+            $this->db->where('id', $id);
             $success = $this->db->update($this->table_empresas, $empresa_data);
             if ($success) {
-                log_activity('Dados contábeis da empresa atualizados [Cliente ID: ' . $cliente_id . ', Empresa Contábil ID: ' . $empresa_existente->id . ']');
-                return $empresa_existente->id;
+                log_activity('Dados contábeis da empresa atualizados [Cliente ID: ' . $data['cliente_id'] . ', Vínculo ID: ' . $id . ']');
+                return $id;
             }
         } else {
             // Insere
@@ -84,7 +85,7 @@ public function get_all_empresas_vinculadas()
             $this->db->insert($this->table_empresas, $empresa_data);
             $insert_id = $this->db->insert_id();
             if ($insert_id) {
-                log_activity('Nova empresa vinculada à contabilidade [Cliente ID: ' . $cliente_id . ', Empresa Contábil ID: ' . $insert_id . ']');
+                log_activity('Nova empresa vinculada à contabilidade [Cliente ID: ' . $data['cliente_id'] . ', Vínculo ID: ' . $insert_id . ']');
                 return $insert_id;
             }
         }
@@ -98,7 +99,6 @@ public function get_all_empresas_vinculadas()
      */
     public function remover_vinculo_empresa($id)
     {
-        // Adicionalmente, pode ser necessário remover sócios, etc., ou tratar isso com FKs (ON DELETE CASCADE)
         $this->db->where('id', $id);
         $success = $this->db->delete($this->table_empresas);
         if ($success) {
@@ -116,7 +116,6 @@ public function get_all_empresas_vinculadas()
 
     public function add_socio($data)
     {
-        // Validação dos dados antes de inserir é crucial (feita no controller)
         $data['data_criacao'] = date('Y-m-d H:i:s');
         $this->db->insert($this->table_socios, $data);
         $insert_id = $this->db->insert_id();
@@ -155,7 +154,7 @@ public function get_all_empresas_vinculadas()
     
     public function get_all_contadores()
     {
-        $this->db->where('ativo', 1); // Apenas contadores ativos
+        $this->db->where('ativo', 1);
         $this->db->order_by('nome_completo', 'asc');
         return $this->db->get($this->table_contadores)->result_array();
     }
@@ -183,8 +182,6 @@ public function get_all_empresas_vinculadas()
 
     public function delete_contador($id)
     {
-        // Verificar se o contador está vinculado a alguma empresa antes de excluir
-        // ou definir o campo contador_id como NULL na tabela contabilidade_empresas (ON DELETE SET NULL)
         $this->db->where('id', $id);
         $success = $this->db->delete($this->table_contadores);
          if($success){
@@ -194,8 +191,7 @@ public function get_all_empresas_vinculadas()
     }
     
     /**
-     * Retorna os tipos de empresa. Por enquanto, um array fixo.
-     * Poderia vir de uma tabela de lookup no futuro.
+     * Retorna os tipos de empresa.
      */
     public function get_tipos_empresa()
     {
@@ -204,11 +200,9 @@ public function get_all_empresas_vinculadas()
             ['id' => 'ei', 'name' => 'EI - Empresário Individual'],
             ['id' => 'ltda', 'name' => 'LTDA - Sociedade Limitada'],
             ['id' => 'sa', 'name' => 'S.A. - Sociedade Anônima'],
-            // Adicionar outros conforme necessário
         ];
     }
-    // Dentro da classe Cadastro_model
-
+    
     /**
      * Conta o total de sócios cadastrados em todas as empresas.
      * @return int

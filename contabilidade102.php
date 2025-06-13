@@ -34,54 +34,12 @@ function contabilidade102_init_menu_items()
 
     if (has_permission('contabilidade102', '', 'view')) {
 
-        // Adiciona o item de menu principal (Pai).
-        // Não tem 'href' para que funcione como um agrupador que abre/fecha.
+        // Adiciona um único item de menu principal que leva direto para o dashboard
         $CI->app_menu->add_sidebar_menu_item('contabilidade102-main-menu', [
             'name'     => _l('contabilidade102_menu_main'), // Traduzido como 'Contabilidade'
             'icon'     => 'fa fa-calculator',
-            'slug'     => 'contabilidade102_slug', // Slug único para o pai
-            'position' => 7,
-        ]);
-        
-        // Adiciona o link do Dashboard como um filho do menu principal
-        // O parent_slug DEVE ser igual ao slug do pai definido acima.
-        $CI->app_menu->add_sidebar_children_item('contabilidade102_slug', [
-            'name'     => _l('contabilidade102_dashboard'), // Dashboard Contábil
-            'slug'     => 'contabilidade102_dashboard_slug',
-            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME), // Link para a página principal
-            'position' => 5,
-        ]);
-
-        // Adiciona o link de Empresas como um filho do menu principal
-        $CI->app_menu->add_sidebar_children_item('contabilidade102_slug', [
-            'name'     => _l('contabilidade102_menu_empresas'), // Empresas
-            'slug'     => 'contabilidade102_empresas_slug',
-            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME . '/empresas'),
-            'position' => 10,
-        ]);
-        
-        // Adiciona o link do Plano de Contas como um filho do menu principal
-        $CI->app_menu->add_sidebar_children_item('contabilidade102_slug', [
-            'name'     => _l('contabilidade102_menu_plano_contas'), // Plano de Contas
-            'slug'     => 'contabilidade102_plano_contas_slug',
-            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME . '/plano_contas'),
-            'position' => 15,
-        ]);
-
-        // Adiciona o link de Lançamentos como um filho do menu principal
-        $CI->app_menu->add_sidebar_children_item('contabilidade102_slug', [
-            'name'     => _l('contabilidade102_menu_lancamentos'), // Lançamentos
-            'slug'     => 'contabilidade102_lancamentos_slug',
-            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME . '/lancamentos'),
-            'position' => 20,
-        ]);
-
-        // Adiciona o link de Livros/Relatórios como um filho do menu principal
-        $CI->app_menu->add_sidebar_children_item('contabilidade102_slug', [
-            'name'     => _l('contabilidade102_menu_livros'), // Livros/Relatórios
-            'slug'     => 'contabilidade102_livros_slug',
-            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME . '/livros'),
-            'position' => 25,
+            'href'     => admin_url(CONTABILIDADE102_MODULE_NAME), // Link direto para a página principal do módulo
+            'position' => 7, // Ajuste a posição no menu lateral conforme desejado
         ]);
     }
 }
@@ -112,8 +70,8 @@ function contabilidade102_module_activate()
     $char_set = $CI->db->char_set;
 
     // Tabela: Plano de Contas
-    if (!$CI->db->table_exists($db_prefix . 'contabilidade_plano_contas')) {
-        $CI->db->query("CREATE TABLE `{$db_prefix}contabilidade_plano_contas` (
+    if (!$CI->db->table_exists($db_prefix . 'contabilidade_planocontas')) {
+        $CI->db->query("CREATE TABLE `{$db_prefix}contabilidade_planocontas` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `codigo` varchar(50) NOT NULL,
             `nome` varchar(255) NOT NULL,
@@ -129,7 +87,7 @@ function contabilidade102_module_activate()
             UNIQUE KEY `uk_codigo` (`codigo`),
             KEY `idx_conta_pai_id` (`conta_pai_id`),
             KEY `idx_tipo` (`tipo`),
-            CONSTRAINT `fk_plano_contas_pai` FOREIGN KEY (`conta_pai_id`) REFERENCES `{$db_prefix}contabilidade_plano_contas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+            CONSTRAINT `fk_planocontas_pai` FOREIGN KEY (`conta_pai_id`) REFERENCES `{$db_prefix}contabilidade_planocontas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET={$char_set};");
         
         // Inserir plano de contas básico se a tabela acabou de ser criada
@@ -183,7 +141,7 @@ function contabilidade102_module_activate()
                 unset($conta['conta_pai_id']);
             }
             
-            $CI->db->insert($db_prefix . 'contabilidade_plano_contas', $conta);
+            $CI->db->insert($db_prefix . 'contabilidade_planocontas', $conta);
             $mapa_contas_pai[$conta['codigo']] = $CI->db->insert_id();
         }
     }

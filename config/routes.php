@@ -24,8 +24,8 @@ $route['admin/contabilidade102'] = 'contabilidade102/admin/index';
     //Exemplo de outras rotas que você adicionará depois:
 
     // Rotas para Plano de Contas
-    $route['admin/contabilidade102/plano_contas'] = 'contabilidade102/plano_contas/index';
-    $route['admin/contabilidade102/plano_contas/(:any)'] = 'contabilidade102/plano_contas/$1';
+    $route['admin/contabilidade102/planocontas'] = 'contabilidade102/planocontas/index';
+    $route['admin/contabilidade102/planocontas/(:any)'] = 'contabilidade102/planocontas/$1';
 
     // Rotas para Empresas
     $route['admin/contabilidade102/empresas'] = 'contabilidade102/empresas/index';
