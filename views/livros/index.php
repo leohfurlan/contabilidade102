@@ -10,6 +10,9 @@
                             <?= $title; ?>
                         </h4>
                         <hr class="hr-panel-heading" />
+                            <a href="javascript:history.back()" class="btn btn-default mright5">
+                                <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                            </a>
 
                         <?= form_open('', ['method' => 'get', 'id' => 'form-filtros-livros']); ?>
                         <div class="row">

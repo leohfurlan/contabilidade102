@@ -77,6 +77,9 @@ if (!function_exists('render_contas_tree_ul')) {
                     <div class="panel-body">
                         <!-- Botão “Adicionar nova conta” -->
                         <div class="_buttons">
+                            <a href="javascript:history.back()" class="btn btn-default mright5">
+                                <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                            </a>
                             <a href="<?= admin_url($module_name . '/' . $slug_pc . '/manage'); ?>"
                                class="btn btn-info pull-left display-block">
                                 <?= _l('contabilidade102_adicionar_nova_conta'); ?>

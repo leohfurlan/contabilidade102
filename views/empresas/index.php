@@ -8,6 +8,9 @@
                     <div class="panel-body">
                         <div class="_buttons">
                             <?php if (has_permission('contabilidade102', '', 'create')) : ?>
+                            <a href="javascript:history.back()" class="btn btn-default mright5">
+                                <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                            </a>
                             <a href="<?= admin_url('contabilidade102/empresas/manage'); ?>" class="btn btn-info pull-left display-block">
                                 <?= _l('contabilidade102_vincular_novo_cliente'); ?>
                             </a>

@@ -18,6 +18,9 @@ class Livros extends AdminController
 
         // ---- ALTERAÇÃO AQUI ----
         $this->load->model($this->module_name . '/Planocontas_model'); // Nome do arquivo/classe com 'c' minúsculo
+        $this->load->library('cliente_context');
+        $this->cliente_context->ensure_selected();      // ← NOVO
+        $this->cliente = $this->cliente_context->get(); // objeto disponível em $this->cliente
     }
 
     // ... método index() e diario() permanecem os mesmos ...

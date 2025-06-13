@@ -52,6 +52,8 @@ $lang['contabilidade102_empresa_lista_telefone']        = 'Telefone';
 $lang['contabilidade102_empresa_lista_regime_trib']     = 'Regime Tributário';
 $lang['contabilidade102_remover_vinculo_btn']           = 'Remover Vínculo';
 $lang['contabilidade102_nenhuma_empresa_vinculada_lista'] = 'Nenhuma empresa/cliente vinculado à contabilidade.';
+$lang['contabilidade102_inscricao_municipal']         = 'Inscrição Municipal'; // Mantido sem o mvp, mas o ideal seria padronizar
+$lang['contabilidade102_status_ativa']         =  'Ativa';
 
 
 // ===============================================================
@@ -177,5 +179,7 @@ $lang['contabilidade102_tipo_dados_ajax_nao_encontrado']  = 'Tipo de dados solic
 $lang['contabilidade102_erro_buscar_dados_ajax']          = 'Erro ao buscar dados: ';
 
 $lang['contabilidade102_acoes_rapidas'] = 'Ações Rápidas';
+
+$lang['go_back'] = 'Voltar';
 
 ?>

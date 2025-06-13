@@ -16,6 +16,9 @@ class PlanoContas extends AdminController
         }
         $this->load->model($this->module_name . '/planocontas_model');
         $this->load->library('form_validation');
+        $this->load->library('cliente_context');
+        $this->cliente_context->ensure_selected();      // ← NOVO
+        $this->cliente = $this->cliente_context->get(); // objeto disponível em $this->cliente
     }
 
     /**

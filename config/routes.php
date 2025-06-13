@@ -28,8 +28,12 @@ $route['admin/contabilidade102'] = 'contabilidade102/admin/index';
     $route['admin/contabilidade102/planocontas/(:any)'] = 'contabilidade102/planocontas/$1';
 
     // Rotas para Empresas
-    $route['admin/contabilidade102/empresas'] = 'contabilidade102/empresas/index';
-    $route['admin/contabilidade102/empresas/(:any)'] = 'contabilidade102/empresas/$1';
+    $route['admin/contabilidade102/empresas'] =
+        'contabilidade102/empresas/index';
+    $route['admin/contabilidade102/empresas/manage/(:num)'] =
+        'contabilidade102/empresas/manage/$1';
+    $route['admin/contabilidade102/empresas/manage'] =
+        'contabilidade102/empresas/manage';
 
     // Rotas para Lançamentos
     $route['admin/contabilidade102/lancamentos'] = 'contabilidade102/lancamentos/index';
@@ -38,5 +42,9 @@ $route['admin/contabilidade102'] = 'contabilidade102/admin/index';
     // Rotas para Livros
     $route['admin/contabilidade102/livros'] = 'contabilidade102/livros/index';
     $route['admin/contabilidade102/livros/(:any)'] = 'contabilidade102/livros/$1';
+
+    $route['admin/contabilidade102/selecionarcliente'] =
+    'contabilidade102/Selecionarcliente/index';
+
 
 ?>

@@ -13,7 +13,9 @@
                             <?php endif; ?>
                         </h4>
                         <hr class="hr-panel-heading" />
-
+                            <a href="javascript:history.back()" class="btn btn-default mright5">
+                                <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                            </a>
                         <?php // Formulário de filtros para o Livro Razão ?>
                         <?= form_open(admin_url(CONTABILIDADE102_MODULE_NAME . '/livros/razao'), ['method' => 'get', 'id' => 'form-filtro-razao']); ?>
                         <div class="row">

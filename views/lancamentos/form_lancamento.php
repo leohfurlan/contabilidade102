@@ -10,6 +10,9 @@
                             <?= $title; ?>
                         </h4>
                         <hr class="hr-panel-heading" />
+                        <a href="javascript:history.back()" class="btn btn-default mright5">
+                            <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                        </a>
 
                         <?php if (isset($validation_errors) && $validation_errors): ?>
                             <div class="alert alert-danger">

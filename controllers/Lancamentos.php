@@ -14,38 +14,61 @@ class Lancamentos extends AdminController
         if (!has_permission($this->module_name, '', 'view')) {
             access_denied($this->module_name);
         }
-        
-        $this->load->model($this->module_name . '/lancamentos_model'); // Carrega Lancamentos_model
-        // Carrega Planocontas_model (arquivo Planocontas_model.php, classe Planocontas_model)
-        $this->load->model($this->module_name . '/Planocontas_model'); 
+
+        // ------------------------------------------------------------------
+        // ALIAS em minúsculo evita problemas de propriedade
+        // ------------------------------------------------------------------
+        $this->load->model($this->module_name . '/lancamentos_model', 'lancamentos_model');
+        $this->load->model($this->module_name . '/Planocontas_model', 'planocontas_model');
+
         $this->load->library('form_validation');
+        $this->load->library('clientecontext');
+        $this->clientecontext->ensureSelected();
+        $this->cliente = $this->clientecontext->get();
     }
 
-    // ... método index() ...
+    /* --------------------------------------------------------------------
+     * LISTAGEM
+     * ------------------------------------------------------------------ */
     public function index()
     {
-        // ... (código do método index como você postou, que parece correto) ...
-        $page = ($this->input->get('page')) ? $this->input->get('page') : 1;
-        $limit = get_option('tables_pagination_limit'); 
+        $page   = $this->input->get('page') ?: 1;
+        $limit  = get_option('tables_pagination_limit');
         $offset = ($page - 1) * $limit;
 
-        // Certifique-se que a instância do model aqui também usa a capitalização correta
-        $data['lancamentos'] = $this->lancamentos_model->get_all_lancamentos_com_itens($limit, $offset); 
-        $total_rows = $this->lancamentos_model->count_all_lancamentos(); 
+        $data['lancamentos']  = $this->lancamentos_model
+                                     ->get_all_lancamentos_com_itens($limit, $offset);
+        $data['total_rows']   = $this->lancamentos_model->count_all_lancamentos();
 
+        /* ---------- Fallback para moeda-base inexistente ---------- */
+        $base_currency = get_base_currency();
+        if (!$base_currency) {
+            $base_currency = (object) [
+                'symbol'             => '',
+                'decimal_separator'  => ',',
+                'thousand_separator' => '.',
+                'placement'          => 'after',
+            ];
+        }
+        $data['base_currency'] = $base_currency;
+        /* ---------------------------------------------------------- */
+
+        /* ------ paginação nativa do CI ------- */
         $this->load->library('pagination');
-        $config['base_url'] = admin_url($this->module_name . '/lancamentos/index');
-        $config['total_rows'] = $total_rows;
-        $config['per_page'] = $limit;
-        $config['use_page_numbers'] = true;
-        $config['reuse_query_string'] = true; 
-
+        $config = [
+            'base_url'          => admin_url($this->module_name . '/lancamentos/index'),
+            'total_rows'        => $data['total_rows'],
+            'per_page'          => $limit,
+            'use_page_numbers'  => true,
+            'reuse_query_string'=> true,
+        ];
         $this->pagination->initialize($config);
         $data['pagination_links'] = $this->pagination->create_links();
-        
-        $data['title'] = _l('contabilidade102_lancamentos'); 
+
+        $data['title'] = _l('contabilidade102_lancamentos');
         $this->load->view($this->module_name . '/lancamentos/index', $data);
     }
+
 
 
     public function lancamento($id = '')

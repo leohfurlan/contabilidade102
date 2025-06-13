@@ -10,6 +10,9 @@
                             <?= $title; // Título: Livro Diário ?>
                         </h4>
                         <hr class="hr-panel-heading" />
+                            <a href="javascript:history.back()" class="btn btn-default mright5">
+                                <i class="fa fa-arrow-left"></i> <?= _l('go_back'); ?>
+                            </a>
 
                         <?php // Formulário de filtros para o Livro Diário ?>
                         <?= form_open(admin_url(CONTABILIDADE102_MODULE_NAME . '/livros/diario'), ['method' => 'get', 'id' => 'form-filtro-diario']); ?>
